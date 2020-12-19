@@ -1,0 +1,22 @@
+﻿@inherits LayoutComponentBase
+@using Blazored.Toast.Configuration
+
+<header>
+    <TopNavMenu />
+</header>
+
+<BlazoredToasts Position="ToastPosition.TopRight"
+                Timeout="3"
+                ShowProgressBar="true"
+                IconType="IconType.FontAwesome"
+                SuccessClass="success-toast-override"
+                SuccessIcon="fa fa-thumbs-up"
+                ErrorIcon="fa fa-bug" />
+
+<div class="content">
+    @Body
+</div>
+
+@code {
+    private bool _isInGame = false;
+} 

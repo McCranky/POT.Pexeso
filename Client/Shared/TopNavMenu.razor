@@ -1,0 +1,75 @@
+﻿@inject NavigationManager Navigation
+@inject IToastService Toast
+
+<nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark border-bottom box-shadow mb-3">
+    <div class="container">
+        <a class="navbar-brand" href="">Pexeso</a>
+        <button class="navbar-toggler" type="button" @onclick="ToggleNavMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+            <ul class="navbar-nav flex-grow-1">
+                <AuthorizeView>
+                    <NotAuthorized>
+                        <li class="nav-item">
+                            <NavLink class="nav-link" href="login">
+                                <i class="fas fa-sign-in-alt fa-sm"></i> Log In
+                            </NavLink>
+                        </li>
+                    </NotAuthorized>
+                    <Authorized>
+                        <li class="nav-item">
+                            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                                <i class="fas fa-home fa-sm"></i> Home
+                            </NavLink>
+                        </li>
+                        <li class="nav-item px-3">
+                            <NavLink class="nav-link" href="lobby">
+                                <span class="oi oi-list-rich" aria-hidden="true"></span> Lobby
+                            </NavLink>
+                        </li>
+                        <li class="nav-item">
+                            <NavLink class="nav-link fa-sm" href="#" @onclick="HandleLogout">
+                                <i class="fas fa-door-open fa-sm"></i> Log Out
+                            </NavLink>
+                        </li>
+                    </Authorized>
+                </AuthorizeView>
+            </ul>
+        </div>
+        @if (!string.IsNullOrWhiteSpace(_nickname)) {
+            <div class="navbar-brand">Nick: @_nickname</div>
+        }
+    </div>
+</nav>
+
+@code {
+    [CascadingParameter]
+    public Task<AuthenticationState> AuthState { get; set; }
+
+    private bool collapseNavMenu = true;
+    private string baseMenuClass = "navbar-collapse d-sm-inline-flex flex-sm-row-reverse";
+    private string NavMenuCssClass => baseMenuClass + (collapseNavMenu ? " collapse" : "");
+
+    private string _nickname = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthState;
+        var userIdentity = authState.User.Identity;
+        if (userIdentity.IsAuthenticated) {
+            _nickname = userIdentity.Name;
+        }
+    }
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+
+    private async Task HandleLogout()
+    {
+        //await Auth.LogoutCurrentUser();
+        Navigation.NavigateTo("/", true);
+    }
+}

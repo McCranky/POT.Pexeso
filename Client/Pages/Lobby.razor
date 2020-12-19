@@ -1,0 +1,15 @@
+﻿@page "/lobby"
+
+@if (_isWaiting) {
+
+} else {
+    <h3 class="font-weight-bolder m-3 align-self-center">Lobby</h3>
+
+    <ul class="list-group w-25 align-self-center m-3 text-center">
+        @foreach (var user in _onlineUsers) {
+            <li class="list-group-item clickable user-select" @onclick="@(async () => await HandleInvitation(user))">
+                @user
+            </li>
+        }
+    </ul>
+}

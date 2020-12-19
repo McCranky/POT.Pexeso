@@ -1,0 +1,101 @@
+﻿@inject HttpClient Http
+@inject IToastService Toast
+
+<div class="input-group mb-3">
+    <div class="input-group-prepend">
+        <label class="input-group-text" for="inputGroupSelect01">Board</label>
+    </div>
+    <select class="custom-select" id="boardSelect" @onchange="HandleBoardChange">
+        @foreach (var type in _boardSizes) {
+            <option value="@type" selected="@(type == _boardSize)">@FormatBoardEnum(type)</option>
+        }
+    </select>
+</div>
+<hr />
+
+<p class="card-text m-3">Card type</p>
+<div class="form-check form-check-inline">
+    <input class="form-check-input" type="radio" name="cardType" id="radioColor" value="@CardType.Color" @onchange="HandleTypeChanged" checked=@(CardType.Color == _cardInfo.Type)>
+    <label class="form-check-label" for="radioColor">Color</label>
+</div>
+<div class="form-check form-check-inline">
+    <input class="form-check-input" type="radio" name="cardType" id="radioPicture" value="@CardType.Picture" @onchange="HandleTypeChanged" checked=@(CardType.Picture == _cardInfo.Type)>
+    <label class="form-check-label" for="radioPicture">Picture</label>
+</div>
+<hr />
+
+<div class="row">
+    <div class="col-9">
+        <div class="input-group">
+            <select class="custom-select" id="cardSelection" @onchange="HandleCardSelect">
+                <option selected>Choose ...</option>
+                @foreach (var card in _cards.Where(card => card.Type == _cardInfo.Type)) {
+                    <option value="@card.Id" selected="@(_cardInfo.Source == card.Source)">@card.Name</option>
+                }
+            </select>
+        </div>
+    </div>
+
+    @if (_cardInfo.Type == CardType.Color) {
+        <div class="col-3 text-center center p-2" style="background-color: @_cardInfo.Source; border-radius: 7px;">
+            Color preview
+        </div>
+    } else {
+        <div class="col-3 text-center center p-2" style="border-radius: 7px;">
+            <img src="@_cardInfo.Source" alt="Card preview" width="100%" />
+        </div>
+    }
+</div>
+
+<div class="btn-group m-3" role="group">
+    <button type="button" class="btn btn-secondary" @onclick="@(() => BlazoredModal.Cancel())">Cancel</button>
+    <button type="button" class="btn btn-info" @onclick="HandleSubmit">Send</button>
+</div>
+
+@code {
+    [CascadingParameter]
+    public BlazoredModalInstance BlazoredModal { get; set; }
+
+    private BoardSize[] _boardSizes;
+    private List<CardInfo> _cards = new List<CardInfo>();
+
+    private BoardSize _boardSize;
+    private CardInfo _cardInfo = new CardInfo();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _boardSizes = Enum.GetValues<BoardSize>();
+        _cards = await Http.GetFromJsonAsync<List<CardInfo>>("resource/getall");
+    }
+
+    private void HandleTypeChanged(ChangeEventArgs args)
+    {
+        _cardInfo.Type = Enum.Parse<CardType>(args.Value.ToString());
+    }
+
+    private string FormatBoardEnum(BoardSize size)
+    {
+        return size.ToString().Replace("_", "");
+    }
+
+    private void HandleCardSelect(ChangeEventArgs args)
+    {
+        var cardId = int.Parse(args.Value.ToString());
+        _cardInfo = _cards.First(c => c.Id == cardId);
+    }
+
+    private void HandleBoardChange(ChangeEventArgs args)
+    {
+        _boardSize = Enum.Parse<BoardSize>(args.Value.ToString());
+    }
+
+    private void HandleSubmit()
+    {
+        if (string.IsNullOrEmpty(_cardInfo.Source)) {
+            Toast.ShowError("Select from every option");
+        } else {
+            BlazoredModal.Close(ModalResult.Ok<GameDetails>(new GameDetails { Card = _cardInfo, Board = _boardSize }));
+        }
+        //BlazoredModal.Close(ModalResult.)
+    }
+}

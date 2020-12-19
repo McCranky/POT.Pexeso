@@ -1,0 +1,53 @@
+﻿@page "/login"
+@inject HttpClient Http
+@inject IToastService Toast
+@inject NavigationManager Navigation
+
+<div class="card bg-light m-3 align-self-center w-25">
+    <div class="card-body">
+        <h5 class="card-title font-weight-bolder">Authentication</h5>
+        <hr />
+        <p class="card-text">Please, identify yourself with a nickname.</p>
+        <input class="mb-3 form-control" type="text" @bind-value="@_nickname" />
+        <a class="btn btn-primary" @onclick="HandleAuthentication">Submit</a>
+    </div>
+</div>
+
+@*<div class="row">
+    <div class="col-9">
+        <div class="input-group">
+            <select class="custom-select" id="image" @onchange="HandleCardSelect">
+                <option selected>Choose image...</option>
+                <option value="/images/kermit.jpg">Kermit</option>
+                <option value="/images/space_candy.jpg">Space candy</option>
+            </select>
+        </div>
+    </div>
+    
+    <div class="col-3 text-center center p-2" style="border-radius: 7px;">
+        <img src="@_color" alt="Card preview"/>
+    </div>
+</div>*@
+
+@code {
+    private string _nickname;
+    //private string _color;
+
+    private async Task HandleAuthentication()
+    {
+        var res = await Http.PostAsJsonAsync<string>("auth/login", _nickname);
+        if (res.StatusCode == System.Net.HttpStatusCode.OK) {
+            Toast.ShowSuccess("Successfully authorized. Enjoy :)");
+            Toast.ShowInfo("Please wait, you will be redirected.");
+            await Task.Delay(3000);
+            Navigation.NavigateTo("/", true);
+        } else {
+            Toast.ShowError("Nickname already used.");
+        }
+    }
+
+    //private void HandleCardSelect(ChangeEventArgs args)
+    //{
+    //    _color = args.Value.ToString();
+    //}
+}
