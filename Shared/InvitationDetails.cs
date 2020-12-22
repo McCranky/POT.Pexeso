@@ -11,5 +11,6 @@ namespace POT.Pexeso.Shared
         public string NicknameTo { get; set; }
         public string NicknameFrom { get; set; }
         public GameDetails GameDetails { get; set; }
+        public bool Rejected { get; set; }
     }
 }

@@ -46,7 +46,7 @@ namespace POT.Pexeso.Server
                 .AddCookie();
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-            services.AddSingleton<UserService>();
+            services.AddSingleton<LobbyService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -1,14 +1,40 @@
 ﻿@page "/lobby"
 
+<h3 class="font-weight-bolder m-3 align-self-center">Lobby</h3>
+
 @if (_isWaiting) {
+    if (string.IsNullOrWhiteSpace(_invitationDetails.NicknameFrom)) {
+        <h5 class="align-self-center">Waiting for response from @_invitationDetails.NicknameTo</h5>
+    } else {
+        <h5 class="align-self-center">Game invitaion from @_invitationDetails.NicknameFrom</h5>
+    }
+    <p class="align-self-center text-muted m-3">Time to auto cancel: @_timer</p>
+    <hr />
+
+    <div class="card align-self-center m-3">
+        <div class="card-body">
+            <h5 class="card-title">Game details</h5>
+            <p class="card-text">Board size: @GameDetails.FormatBoardEnum(_invitationDetails.GameDetails.Board)</p>
+            <p class="card-text">Card type: @_invitationDetails.GameDetails.Card.Type</p>
+            <p class="card-text">@_invitationDetails.GameDetails.Card.Source</p>
+        </div>
+    </div>
+
+    <div class="btn-group m-3" role="group">
+        @if (!string.IsNullOrWhiteSpace(_invitationDetails.NicknameFrom)) {
+            <button type="button" class="btn btn-success" @onclick="AcceptInvitation">Confirm</button>
+            <button type="button" class="btn btn-warning" @onclick="@(async() => await CancelInvitation(true))">Reject</button>
+        } else {
+            <button type="button" class="btn btn-info" @onclick="@(async() => await CancelInvitation())">Cancel</button>
+        }
+    </div>
 
 } else {
-    <h3 class="font-weight-bolder m-3 align-self-center">Lobby</h3>
-
     <ul class="list-group w-25 align-self-center m-3 text-center">
         @foreach (var user in _onlineUsers) {
-            <li class="list-group-item clickable user-select" @onclick="@(async () => await HandleInvitation(user))">
-                @user
+            <li class="list-group-item clickable user-select" @onclick="@(async () => await HandleInvitation(user.Nickname))">
+                <p>@user.Nickname</p>
+                <p>@user.Status</p>
             </li>
         }
     </ul>

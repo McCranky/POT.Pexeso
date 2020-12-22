@@ -2,8 +2,9 @@
 {
     public enum Status
     {
-        InGame,
-        Online
+        Online,
+        Pairing,
+        InGame
     }
 
     public class UserDisplayInfo

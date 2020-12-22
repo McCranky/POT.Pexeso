@@ -12,8 +12,8 @@ namespace POT.Pexeso.Server.Controllers
     [Route("[controller]")]
     public class UserController : ControllerBase
     {
-        private UserService _userService;
-        public UserController(UserService userService)
+        private LobbyService _userService;
+        public UserController(LobbyService userService)
         {
             _userService = userService;
         }

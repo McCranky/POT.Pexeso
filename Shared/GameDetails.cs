@@ -37,7 +37,15 @@ namespace POT.Pexeso.Shared
 
     public class GameDetails
     {
+        public static readonly int ResponseDelay = 15;
         public BoardSize Board { get; set; }
         public CardInfo Card { get; set; }
+
+        public static string FormatBoardEnum(BoardSize size)
+        {
+            return size.ToString().Replace("_", "");
+        }
     }
+
+    
 }

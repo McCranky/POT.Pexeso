@@ -7,7 +7,7 @@
     </div>
     <select class="custom-select" id="boardSelect" @onchange="HandleBoardChange">
         @foreach (var type in _boardSizes) {
-            <option value="@type" selected="@(type == _boardSize)">@FormatBoardEnum(type)</option>
+            <option value="@type" selected="@(type == _boardSize)">@GameDetails.FormatBoardEnum(type)</option>
         }
     </select>
 </div>
@@ -73,11 +73,6 @@
         _cardInfo.Type = Enum.Parse<CardType>(args.Value.ToString());
     }
 
-    private string FormatBoardEnum(BoardSize size)
-    {
-        return size.ToString().Replace("_", "");
-    }
-
     private void HandleCardSelect(ChangeEventArgs args)
     {
         var cardId = int.Parse(args.Value.ToString());
@@ -96,6 +91,5 @@
         } else {
             BlazoredModal.Close(ModalResult.Ok<GameDetails>(new GameDetails { Card = _cardInfo, Board = _boardSize }));
         }
-        //BlazoredModal.Close(ModalResult.)
     }
 }
