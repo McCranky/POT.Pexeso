@@ -7,7 +7,7 @@
     </div>
     <select class="custom-select" id="boardSelect" @onchange="HandleBoardChange">
         @foreach (var type in _boardSizes) {
-            <option value="@type" selected="@(type == _boardSize)">@GameDetails.FormatBoardEnum(type)</option>
+            <option value="@type" selected="@(type == _boardSize)">@GameSettings.FormatBoardEnum(type)</option>
         }
     </select>
 </div>
@@ -57,15 +57,15 @@
     public BlazoredModalInstance BlazoredModal { get; set; }
 
     private BoardSize[] _boardSizes;
-    private List<CardInfo> _cards = new List<CardInfo>();
+    private List<CardBackInfo> _cards = new List<CardBackInfo>();
 
     private BoardSize _boardSize;
-    private CardInfo _cardInfo = new CardInfo();
+    private CardBackInfo _cardInfo = new CardBackInfo();
 
     protected override async Task OnInitializedAsync()
     {
         _boardSizes = Enum.GetValues<BoardSize>();
-        _cards = await Http.GetFromJsonAsync<List<CardInfo>>("resource/getall");
+        _cards = await Http.GetFromJsonAsync<List<CardBackInfo>>("resource/getall");
     }
 
     private void HandleTypeChanged(ChangeEventArgs args)
@@ -89,7 +89,7 @@
         if (string.IsNullOrEmpty(_cardInfo.Source)) {
             Toast.ShowError("Select from every option");
         } else {
-            BlazoredModal.Close(ModalResult.Ok<GameDetails>(new GameDetails { Card = _cardInfo, Board = _boardSize }));
+            BlazoredModal.Close(ModalResult.Ok<GameSettings>(new GameSettings { CardBack = _cardInfo, BoardSize = _boardSize }));
         }
     }
 }

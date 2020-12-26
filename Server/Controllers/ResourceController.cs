@@ -21,10 +21,10 @@ namespace POT.Pexeso.Server.Controllers
         }
 
         [HttpGet("getall")]
-        public async Task<ActionResult<List<CardInfo>>> GetAll()
+        public async Task<ActionResult<List<CardBackInfo>>> GetAll()
         {
             var cards = await _dataContext.Cards
-                .Select(card => new CardInfo { 
+                .Select(card => new CardBackInfo { 
                                         Id = card.Id,
                                         Type = card.Type, 
                                         Name = card.Name, 

@@ -4,6 +4,7 @@ using POT.Pexeso.Data;
 using POT.Pexeso.Server.Hubs;
 using POT.Pexeso.Shared;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -20,7 +21,7 @@ namespace POT.Pexeso.Server.Services
 
     public class LobbyService
     {
-        private Dictionary<string, Details> _onlineUsers;
+        private ConcurrentDictionary<string, Details> _onlineUsers;
         private IHubContext<LobbyHub> _hub;
 
         private Timer _pairingTimer;
@@ -28,7 +29,7 @@ namespace POT.Pexeso.Server.Services
         public LobbyService(IHubContext<LobbyHub> hubContext)
         {
             _hub = hubContext;
-            _onlineUsers = new Dictionary<string, Details>();
+            _onlineUsers = new ConcurrentDictionary<string, Details>();
 
             _pairingTimer = new Timer(1000);
             _pairingTimer.Elapsed += async (sender, e) => {
@@ -49,28 +50,30 @@ namespace POT.Pexeso.Server.Services
 
         public void ConnectUser(string nickname, string connectioId, Status status)
         {
-            _onlineUsers.Add(nickname, new Details { ConnectionId = connectioId, Status = status });
+            _onlineUsers.TryAdd(nickname, new Details { ConnectionId = connectioId, Status = status });
         }
 
         public void DisconnectUser(string nickname)
         {
-            _onlineUsers.Remove(nickname);
+            _onlineUsers.Remove(nickname, out _);
         }
 
         public Dictionary<string, Details> GetAllOnlineUsers()
         {
-            return _onlineUsers;
+            return _onlineUsers.ToDictionary(pair => pair.Key,
+                                             pair => pair.Value);
         }
 
         public string GetConnectionId(string nick)
         {
-            return _onlineUsers[nick].ConnectionId;
+            _onlineUsers.TryGetValue(nick, out var details);
+            return details?.ConnectionId;
         }
 
         public async Task AssignForPairingAsync(IEnumerable<string> nicks)
         {
             foreach (var nick in nicks) {
-                _onlineUsers[nick].TimeElapsed = GameDetails.ResponseDelay;
+                _onlineUsers[nick].TimeElapsed = GameSettings.ResponseDelay;
                 _onlineUsers[nick].Status = Status.Pairing;
 
                 await _hub.Clients.All.SendAsync("UserStatusChanged", nick, Status.Pairing);

@@ -14,9 +14,9 @@
     <div class="card align-self-center m-3">
         <div class="card-body">
             <h5 class="card-title">Game details</h5>
-            <p class="card-text">Board size: @GameDetails.FormatBoardEnum(_invitationDetails.GameDetails.Board)</p>
-            <p class="card-text">Card type: @_invitationDetails.GameDetails.Card.Type</p>
-            <p class="card-text">@_invitationDetails.GameDetails.Card.Source</p>
+            <p class="card-text">Board size: @GameSettings.FormatBoardEnum(_invitationDetails.GameSettings.BoardSize)</p>
+            <p class="card-text">Card type: @_invitationDetails.GameSettings.CardBack.Type</p>
+            <p class="card-text">@_invitationDetails.GameSettings.CardBack.Source</p>
         </div>
     </div>
 
@@ -32,7 +32,7 @@
 } else {
     <ul class="list-group w-25 align-self-center m-3 text-center">
         @foreach (var user in _onlineUsers) {
-            <li class="list-group-item clickable user-select" @onclick="@(async () => await HandleInvitation(user.Nickname))">
+            <li class="list-group-item clickable user-select" @onclick="@(async () => await HandleInvitation(user))">
                 <p>@user.Nickname</p>
                 <p>@user.Status</p>
             </li>

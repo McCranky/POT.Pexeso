@@ -47,6 +47,7 @@ namespace POT.Pexeso.Server
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddSingleton<LobbyService>();
+            services.AddSingleton<GameService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -76,6 +77,7 @@ namespace POT.Pexeso.Server
                 endpoints.MapRazorPages();
                 endpoints.MapControllers();
                 endpoints.MapHub<LobbyHub>("/hub-lobby");
+                endpoints.MapHub<GameHub>("/hub-game");
                 endpoints.MapFallbackToFile("index.html");
             });
         }

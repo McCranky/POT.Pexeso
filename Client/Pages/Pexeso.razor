@@ -1,0 +1,53 @@
+﻿@page "/pexeso"
+ 
+<ul class="list-group w-50 align-self-center m-3 text-center">
+    <li class="list-group-item">
+        @if (_onTheMove == _me) {
+            <p class="my-turn"><i class="fas fa-arrow-right"></i>  @_me.Nickname: @_me.Score</p>
+        } else {
+            <p>@_me.Nickname: @_me.Score</p>
+        }
+    </li>
+
+    <li class="list-group-item cursor-default">
+        @if (_onTheMove == _opponent) {
+            <p><i class="fas fa-arrow-right"></i>   @_opponent.Nickname: @_opponent.Score</p>
+        } else {
+            <p> @_opponent.Nickname: @_opponent.Score</p>
+        }
+    </li>
+
+    @if (_isTimeout) {
+        <li class="list-group-item cursor-default">
+            <p class="font-weight-bolder text-danger">
+                Countdown: @_timeout
+            </p>
+        </li>
+    }
+</ul>
+
+@if (_board != null) {
+    <table class="table-top">
+        @for (int i = 0; i < _board._height; i++) {
+            var indexI = i;
+            <tr>
+                @for (int j = 0; j < _board._width; j++) {
+                    var indexJ = j;
+                    <td>
+                        <div class="@(_board[i,j].IsFlipped ? "card-container flip" : "card-container")" @onclick="@(async () => await HandleCardSelect(indexI, indexJ))">
+                            <div class="@(_gameSettings.CardBack.Type == CardType.Picture ? "card-pexeso img" : "card-pexeso")"
+                                 style="@(_gameSettings.CardBack.Type == CardType.Picture ?
+                                          $"background-image: url({_gameSettings.CardBack.Source});"
+                                          : $"background-color: {_gameSettings.CardBack.Source};")">
+                                <div class="front face"></div>
+                                <div class="back face text-center pagination-center">
+                                    <i class="@_board[i, j].Data"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                }
+            </tr>
+        }
+    </table>
+}

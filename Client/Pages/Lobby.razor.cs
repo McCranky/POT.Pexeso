@@ -1,4 +1,4 @@
-﻿using Blazored.Modal;
+﻿using Blazored.LocalStorage;
 using Blazored.Modal.Services;
 using Blazored.Toast.Services;
 using Microsoft.AspNetCore.Components;
@@ -16,6 +16,7 @@ namespace POT.Pexeso.Client.Pages
     {
         [Inject] public NavigationManager Navigation { get; set; }
         [Inject] public IToastService Toast { get; set; }
+        [Inject] public ILocalStorageService Storage { get; set; }
         [CascadingParameter] public IModalService InvitationOptionsModal { get; set; }
 
         protected List<UserDisplayInfo> _onlineUsers = new List<UserDisplayInfo>();
@@ -65,6 +66,11 @@ namespace POT.Pexeso.Client.Pages
                 StateHasChanged();
             });
 
+            hubConnection.On<InvitationDetails>("InvitationAccepted", async (details) => {
+                await Storage.SetItemAsync("invitationDetails", details);
+                Navigation.NavigateTo("/pexeso");
+            });
+
             hubConnection.On<bool>("InvitationCancelled", (rejected) => {
                 ResetInvitationAttributes();
                 if (rejected) {
@@ -81,24 +87,30 @@ namespace POT.Pexeso.Client.Pages
         public bool IsConnected =>
             hubConnection.State == HubConnectionState.Connected;
 
-        protected async Task HandleInvitation(string nick)
+        protected async Task HandleInvitation(UserDisplayInfo user)
         {
+            if (user.Status == Status.InGame) {
+                Toast.ShowError("Player in game can't be invited.");
+                return;
+            }
+
+            if (user.Status == Status.Pairing) {
+                Toast.ShowWarning("Player is currently pairing, try again later.");
+                return;
+            }
+
             var formModal = InvitationOptionsModal.Show<InvitationForm>("Game Settings");
             var result = await formModal.Result;
 
             if (!result.Cancelled) {
-                var gameDetails = (GameDetails)result.Data;
-                var invitationDetails = new InvitationDetails { GameDetails = gameDetails, NicknameTo = nick };
+                var gameSettings = (GameSettings)result.Data;
+                var invitationDetails = new InvitationDetails { GameSettings = gameSettings, NicknameTo = user.Nickname };
                 await hubConnection.SendAsync("SendInvitation", invitationDetails);
 
                 _invitationDetails = invitationDetails;
                 _isWaiting = true;
             }
         }
-
-        Task Send() =>
-        hubConnection.SendAsync("CancelInvitation", _invitationDetails);
-
 
         private async Task CancelInvitation(bool rejected = false)
         {
@@ -117,7 +129,7 @@ namespace POT.Pexeso.Client.Pages
         {
             _isWaiting = false;
             _invitationDetails = null;
-            _timer = GameDetails.ResponseDelay;
+            _timer = GameSettings.ResponseDelay;
         }
 
         public async ValueTask DisposeAsync()

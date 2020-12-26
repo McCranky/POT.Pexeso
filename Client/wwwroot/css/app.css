@@ -3,7 +3,15 @@
 html, body {
     font-family: 'Nunito', sans-serif;
 }
-
+/*body {*/
+    /* Margin bottom by footer height */
+    /*margin-bottom: 60px;
+}*/
+html {
+    position: relative;
+    min-height: 100%;
+    font-size: 14px;
+}
 
 .content {
     display: flex;
@@ -34,27 +42,49 @@ nav {
         color: dodgerblue;
     }
 
-html {
-    position: relative;
-    min-height: 100%;
-    font-size: 14px;
-}
-
 @media (min-width: 768px) {
     html {
         font-size: 16px;
     }
 }
-body {
-    /* Margin bottom by footer height */
-    margin-bottom: 60px;
+
+.user-select {
+    transition: all 275ms ease;
 }
 
+    .user-select:hover {
+        background-color: #e67e22;
+        color: #ecf0f1;
+    }
 
+.cursor-default {
+    cursor: default;
+}
 
+.my-turn {
+    animation: cycleTextColor 1s ease infinite;
+}
 
+@keyframes cycleTextColor {
+    0% {
+        color: #2ecc71;
+    }
 
+    50% {
+        color: #27ae60;
+    }
 
+    100% {
+        color: #2ecc71;
+    }
+}
+
+.game-info{
+    position: fixed;
+    left: 5px;
+    top: 60px;
+    
+}
 
 
 

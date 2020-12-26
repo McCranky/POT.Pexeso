@@ -20,17 +20,14 @@ namespace POT.Pexeso.Server.Hubs
         private IHttpContextAccessor _httpContextAccessor;
         private PexesoDataContext _dataContext;
         private LobbyService _lobbyService;
+        private GameService _gameService;
 
-        //private bool _isCancelled;
-        //private Timer _waitingTimer;
-        //private InvitationDetails _details;
-        private int _counter;
-
-        public LobbyHub(IHttpContextAccessor httpContext, PexesoDataContext dataContext, LobbyService userService)
+        public LobbyHub(IHttpContextAccessor httpContext, PexesoDataContext dataContext, LobbyService userService, GameService gameService)
         {
             _httpContextAccessor = httpContext;
             _dataContext = dataContext;
             _lobbyService = userService;
+            _gameService = gameService;
         }
 
         public override async Task OnConnectedAsync()
@@ -39,7 +36,7 @@ namespace POT.Pexeso.Server.Hubs
             var nick = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.Name);
             Console.WriteLine($"{nick} connected.");
             // zaradim medzi prihlasenych
-            _lobbyService.ConnectUser(nick, Context.ConnectionId, Shared.Status.Online);
+            _lobbyService.ConnectUser(nick, Context.ConnectionId, Status.Online);
             // prihlasim ho v databaze
             var dbUser = await _dataContext.Users.FirstOrDefaultAsync(user => user.Nickname == nick);
             dbUser.IsOnline = true;
@@ -87,19 +84,6 @@ namespace POT.Pexeso.Server.Hubs
             await _lobbyService.AssignForPairingAsync(new[] { details.NicknameFrom, details.NicknameTo });
         }
 
-        //private async void WaitForResponse(Object source, ElapsedEventArgs e)
-        //{
-        //    var ids = new string[2];
-        //    ids[0] = _lobbyService.GetConnectionId(_details.NicknameFrom);
-        //    ids[1] = _lobbyService.GetConnectionId(_details.NicknameTo);
-
-        //    await Clients.Clients(ids).SendAsync("TimerChanged", _counter);
-
-        //    if (_counter-- < 0) {
-        //        await CancelInvitation(_details);
-        //    }
-        //}
-
         public async Task CancelInvitation(InvitationDetails details)
         {
             var ids = new List<string>();
@@ -122,7 +106,12 @@ namespace POT.Pexeso.Server.Hubs
 
         public async Task AcceptInvitation(InvitationDetails details)
         {
+            _gameService.AddGame(details.GameSettings, details.NicknameFrom, details.NicknameTo);
 
+            var ids = new List<string>();
+            ids.Add(_lobbyService.GetConnectionId(details.NicknameTo));
+            ids.Add(_lobbyService.GetConnectionId(details.NicknameFrom));
+            await Clients.Clients(ids).SendAsync("InvitationAccepted", details);
         }
     }
 }

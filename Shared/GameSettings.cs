@@ -35,17 +35,26 @@ namespace POT.Pexeso.Shared
         Picture
     }
 
-    public class GameDetails
+    public class GameSettings
     {
         public static readonly int ResponseDelay = 15;
-        public BoardSize Board { get; set; }
-        public CardInfo Card { get; set; }
+        public static readonly int CardShowDelay = 2;
+        public static readonly int GameoverDelay = 3;
+        public BoardSize BoardSize { get; set; }
+        public CardBackInfo CardBack { get; set; }
 
         public static string FormatBoardEnum(BoardSize size)
         {
             return size.ToString().Replace("_", "");
         }
-    }
 
+        public static void ParseWidhtAndHeight(BoardSize size, out int widht, out int height)
+        {
+            var stringDimensions = FormatBoardEnum(size);
+            var dimensions = stringDimensions.Split("x", StringSplitOptions.RemoveEmptyEntries);
+            widht = int.Parse(dimensions[0]);
+            height = int.Parse(dimensions[1]);
+        }
+    }
     
 }
