@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Database;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using POT.Pexeso.Data;
 using POT.Pexeso.Shared;
@@ -13,9 +14,9 @@ namespace POT.Pexeso.Server.Controllers
     [Route("[controller]")]
     public class ResourceController : Controller
     {
-        private readonly PexesoDataContext _dataContext;
+        private readonly PexesoDbContext _dataContext;
 
-        public ResourceController(PexesoDataContext dataContext)
+        public ResourceController(PexesoDbContext dataContext)
         {
             _dataContext = dataContext;
         }
@@ -31,6 +32,13 @@ namespace POT.Pexeso.Server.Controllers
                                         Source = card.Source })
                 .ToListAsync();
             return Ok(cards);
+        }
+
+        [HttpGet("get/{id}")]
+        public async Task<ActionResult<CardBackInfo>> Get([FromRoute] int id)
+        {
+            var card = await _dataContext.Cards.FirstOrDefaultAsync(card => card.Id == id);
+            return Ok(card);
         }
     }
 }

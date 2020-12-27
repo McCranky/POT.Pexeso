@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Database": {
+      "commandName": "Project",
+      "workingDirectory": "../SharedWorkingDirectory"
+    }
+  }
+}

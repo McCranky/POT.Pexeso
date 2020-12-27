@@ -1,0 +1,45 @@
+﻿<Window x:Class="CardImporter.CardWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CardImporter"
+        mc:Ignorable="d"
+        Title="CardWindow" Height="312" Width="424">
+    <Grid x:Name="grid">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="Type:" VerticalAlignment="Center" Margin="8"/>
+        <ComboBox x:Name="cbType" Grid.Row="0" Grid.Column="1" Margin="8" SelectionChanged="cbType_SelectionChanged">
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding}"/>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+        
+        <TextBlock Grid.Row="1" Grid.Column="0" Text="Name:" VerticalAlignment="Center" Margin="8"/>
+        <TextBox Grid.Row="1" Grid.Column="1" Margin="8" Text="{Binding Name}"/>
+
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="Source:" VerticalAlignment="Center" Margin="8"/>
+        <TextBox x:Name="tbSource" Grid.Row="2" Grid.Column="1" Margin="8" Text="{Binding Source}"/>
+        <StackPanel x:Name="spImageInput" Grid.Row="2" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" >
+            <Button x:Name="btnSource" Margin="8" Content="Select Image" Click="btnSource_Click"/>
+            <TextBlock x:Name="txtImage" VerticalAlignment="Center" Text="{Binding Source}"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Right">
+            <Button x:Name="btnOk" Content="Ok" Margin="8" Padding="10, 5" MinWidth="80" Click="btnOk_Click"/>
+            <Button x:Name="btnCancel" Content="Cancel" Margin="8" Padding="10, 5" MinWidth="80" IsCancel="True"/>
+        </StackPanel>
+    </Grid>
+</Window>

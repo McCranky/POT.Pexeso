@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using POT.Pexeso.Shared.Pexeso;
 using System.Timers;
+using Database;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace POT.Pexeso.Server.Services
 {
@@ -18,12 +20,17 @@ namespace POT.Pexeso.Server.Services
         private LobbyService _lobbyService;
         private Timer _gameTimer;
         private readonly int _refreshRate;
+        private PexesoDbContext _dbContext;
+        private readonly IServiceProvider _serviceProvider;
 
-        public GameService(IHubContext<GameHub> hubContext, LobbyService lobbyService)
+        public GameService(IHubContext<GameHub> hubContext, LobbyService lobbyService, IServiceProvider serviceProvider)
         {
             _games = new ConcurrentBag<GameInfo>();
             _hubContext = hubContext;
             _lobbyService = lobbyService;
+            //_dbContext = dbContext;
+            _serviceProvider = serviceProvider;
+            
 
             _refreshRate = 20;
             _gameTimer = new Timer(_refreshRate);
@@ -111,7 +118,8 @@ namespace POT.Pexeso.Server.Services
                 GameSettings = settings,
                 OnTheMove = playerChallenger,
                 Board = new Board(settings.BoardSize),
-                Moves = new List<MoveRecord>()
+                Moves = new List<Shared.Pexeso.MoveRecord>(),
+                Started = DateTime.Now
             });
         }
 
@@ -145,15 +153,18 @@ namespace POT.Pexeso.Server.Services
             game.IsTimeout = false;
             game.Time = 0;
 
-            game.Moves.Add(new MoveRecord {
+            game.Moves.Add(new Shared.Pexeso.MoveRecord {
                 Nickname = nick,
                 X = width,
                 Y = height,
                 Time = DateTime.Now
+                //Id = game.Moves.Count
             });
 
             var currentPlayer = game.Challenger.Nickname == nick ? game.Challenger : game.Opponent;
             var otherPlayer = game.Challenger.Nickname != currentPlayer.Nickname ? game.Challenger : game.Opponent;
+
+            ++currentPlayer.MovesCount;
 
             var ids = new string[] { _lobbyService.GetConnectionId(currentPlayer.Nickname), 
                                     _lobbyService.GetConnectionId(otherPlayer.Nickname) };
@@ -181,6 +192,37 @@ namespace POT.Pexeso.Server.Services
 
             await _hubContext.Clients.Client(ids[1]).SendAsync("FlipCard", height, width);
             if (gameover) {
+                game.Ended = DateTime.Now;
+                var moves = new Database.Models.Moves { MoveRecords = game.Moves };
+
+                using (var scope = _serviceProvider.CreateScope()) {
+                    _dbContext = scope.ServiceProvider.GetService<PexesoDbContext>();
+
+                    //await _dbContext.Moves.AddAsync(moves);
+                    //await _dbContext.SaveChangesAsync();
+                    var record = new Database.Models.GameRecord {
+                        //MovesId = moves.Id,
+                        Opponent = game.Opponent.Nickname,
+                        OpponentMoves = game.Opponent.MovesCount,
+                        Challenger = game.Challenger.Nickname,
+                        ChallengerMoves = game.Challenger.MovesCount,
+                        Started = game.Started,
+                        Ended = game.Ended,
+                        BoardSize = game.GameSettings.BoardSize,
+                        CardId = game.GameSettings.CardBack.Id,
+                        //CardInfo = game.GameSettings.CardBack,
+                        Winner = "Yolo",
+                        Moves = game.Moves
+                    };
+                    await _dbContext.Records.AddAsync(record);
+
+                    await _dbContext.SaveChangesAsync();
+                }
+
+               
+
+
+                
                 await _hubContext.Clients.Clients(ids).SendAsync("ChangeGameState", GameState.Gameover);
                 game.GameState = GameState.Gameover;
             }

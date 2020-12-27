@@ -16,7 +16,11 @@
             <h5 class="card-title">Game details</h5>
             <p class="card-text">Board size: @GameSettings.FormatBoardEnum(_invitationDetails.GameSettings.BoardSize)</p>
             <p class="card-text">Card type: @_invitationDetails.GameSettings.CardBack.Type</p>
-            <p class="card-text">@_invitationDetails.GameSettings.CardBack.Source</p>
+            @if (_invitationDetails.GameSettings.CardBack.Type == CardType.Color) {
+                <p class="card-text">@_invitationDetails.GameSettings.CardBack.Source</p>
+            } else {
+                <img src="@_invitationDetails.GameSettings.CardBack.Source" alt="Card preview" width="75" height="125" />
+            }
         </div>
     </div>
 

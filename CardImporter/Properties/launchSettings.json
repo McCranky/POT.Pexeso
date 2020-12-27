@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "CardImporter": {
+      "commandName": "Project",
+      "workingDirectory": "../SharedWorkingDirectory"
+    }
+  }
+}

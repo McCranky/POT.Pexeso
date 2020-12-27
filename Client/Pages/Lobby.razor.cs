@@ -8,6 +8,8 @@ using POT.Pexeso.Shared;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Json;
 using System.Threading.Tasks;
 
 namespace POT.Pexeso.Client.Pages
@@ -17,6 +19,7 @@ namespace POT.Pexeso.Client.Pages
         [Inject] public NavigationManager Navigation { get; set; }
         [Inject] public IToastService Toast { get; set; }
         [Inject] public ILocalStorageService Storage { get; set; }
+        [Inject] public HttpClient Http { get; set; }
         [CascadingParameter] public IModalService InvitationOptionsModal { get; set; }
 
         protected List<UserDisplayInfo> _onlineUsers = new List<UserDisplayInfo>();
@@ -49,8 +52,10 @@ namespace POT.Pexeso.Client.Pages
                 StateHasChanged();
             });
 
-            hubConnection.On<InvitationDetails>("ReceiveInvitation", (details) => {
+            hubConnection.On<InvitationDetails>("ReceiveInvitation", async (details) => {
                 _invitationDetails = details;
+                var card = await Http.GetFromJsonAsync<CardBackInfo>($"resource/get/{_invitationDetails.GameSettings.CardBack.Id}");
+                _invitationDetails.GameSettings.CardBack.Source = card.Source;
                 _isWaiting = true;
                 StateHasChanged();
             });
@@ -67,7 +72,7 @@ namespace POT.Pexeso.Client.Pages
             });
 
             hubConnection.On<InvitationDetails>("InvitationAccepted", async (details) => {
-                await Storage.SetItemAsync("invitationDetails", details);
+                //await Storage.SetItemAsync("invitationDetails", details);
                 Navigation.NavigateTo("/pexeso");
             });
 
@@ -105,8 +110,11 @@ namespace POT.Pexeso.Client.Pages
             if (!result.Cancelled) {
                 var gameSettings = (GameSettings)result.Data;
                 var invitationDetails = new InvitationDetails { GameSettings = gameSettings, NicknameTo = user.Nickname };
+                var src = invitationDetails.GameSettings.CardBack.Source;
+                invitationDetails.GameSettings.CardBack.Source = "";
                 await hubConnection.SendAsync("SendInvitation", invitationDetails);
 
+                invitationDetails.GameSettings.CardBack.Source = src;
                 _invitationDetails = invitationDetails;
                 _isWaiting = true;
             }
@@ -121,6 +129,7 @@ namespace POT.Pexeso.Client.Pages
 
         private async Task AcceptInvitation()
         {
+            _invitationDetails.GameSettings.CardBack.Source = "";
             await hubConnection.SendAsync("AcceptInvitation", _invitationDetails);
             ResetInvitationAttributes();
         }

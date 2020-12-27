@@ -1,3 +1,4 @@
+using Database;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -28,7 +29,10 @@ namespace POT.Pexeso.Server
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSignalR();
+            services.AddSignalR(hubOptions => {
+                //hubOptions.MaximumReceiveMessageSize = 300000;
+                
+            });
 
             services.AddControllersWithViews();
             services.AddRazorPages();
@@ -39,8 +43,9 @@ namespace POT.Pexeso.Server
                     new[] { "application/octet-stream" });
             });
 
-            services.AddDbContext<PexesoDataContext>(options =>
-                options.UseSqlite("DataSource=PexesoData.db"));
+            //services.AddDbContext<PexesoDataContext>(options =>
+            //    options.UseSqlite("DataSource=../SharedWorkingDirectory/PexesoData.db"));
+            services.AddEntityFrameworkSqlite().AddDbContext<Database.PexesoDbContext>();
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie();

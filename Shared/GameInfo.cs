@@ -1,4 +1,5 @@
 ﻿using POT.Pexeso.Shared.Pexeso;
+using System;
 using System.Collections.Generic;
 
 namespace POT.Pexeso.Shared
@@ -26,5 +27,8 @@ namespace POT.Pexeso.Shared
         public GameSettings GameSettings { get; set; }
         public Board Board { get; set; }
         public List<MoveRecord> Moves { get; set; }
+        public DateTime Started { get; set; }
+        public DateTime Ended { get; set; }
+
     }
 }

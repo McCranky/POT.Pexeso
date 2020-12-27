@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Authentication;
+﻿using Database;
+using Database.Models;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using POT.Pexeso.Data;
@@ -15,8 +17,8 @@ namespace POT.Pexeso.Server.Controllers
     [Route("[controller]")]
     public class AuthController : ControllerBase
     {
-        PexesoDataContext _context;
-        public AuthController(PexesoDataContext dataContext)
+        PexesoDbContext _context;
+        public AuthController(PexesoDbContext dataContext)
         {
             _context = dataContext;
         }
@@ -31,7 +33,7 @@ namespace POT.Pexeso.Server.Controllers
             }
 
             if (usr == null) {
-                usr = new Data.Models.User { IsOnline = true, Loses = 0, Wins = 0, Nickname = nickname };
+                usr = new User { IsOnline = true, Loses = 0, Wins = 0, Nickname = nickname };
                 await _context.Users.AddAsync(usr);
                 await _context.SaveChangesAsync();
             } else {

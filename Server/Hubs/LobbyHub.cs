@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Database;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
@@ -18,11 +19,11 @@ namespace POT.Pexeso.Server.Hubs
     public class LobbyHub : Hub
     {
         private IHttpContextAccessor _httpContextAccessor;
-        private PexesoDataContext _dataContext;
+        private PexesoDbContext _dataContext;
         private LobbyService _lobbyService;
         private GameService _gameService;
 
-        public LobbyHub(IHttpContextAccessor httpContext, PexesoDataContext dataContext, LobbyService userService, GameService gameService)
+        public LobbyHub(IHttpContextAccessor httpContext, PexesoDbContext dataContext, LobbyService userService, GameService gameService)
         {
             _httpContextAccessor = httpContext;
             _dataContext = dataContext;

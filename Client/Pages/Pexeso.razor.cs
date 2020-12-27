@@ -8,6 +8,8 @@ using POT.Pexeso.Shared.Pexeso;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Json;
 using System.Threading.Tasks;
 
 namespace POT.Pexeso.Client.Pages
@@ -17,6 +19,7 @@ namespace POT.Pexeso.Client.Pages
         [Inject] public NavigationManager Navigation { get; set; }
         [Inject] public IToastService Toast { get; set; }
         [Inject] public ILocalStorageService Storage { get; set; }
+        [Inject] public HttpClient Http { get; set; }
 
         [CascadingParameter]
         public Task<AuthenticationState> AuthState { get; set; }
@@ -41,12 +44,15 @@ namespace POT.Pexeso.Client.Pages
                 .WithUrl(Navigation.ToAbsoluteUri("/hub-game"))
                 .Build();
 
-            _hubConnection.On<Player, Player, Player, GameSettings, List<Card>>("GetGameInfo", (challenger, opponent, onTheMove, settings, cards) => {
+            _hubConnection.On<Player, Player, Player, GameSettings, List<Card>>("GetGameInfo", async (challenger, opponent, onTheMove, settings, cards) => {
                 _opponent = challenger.Nickname == _me.Nickname ? opponent : challenger;
                 _me = challenger.Nickname == _me.Nickname ? challenger : opponent;
 
                 _gameState = GameState.Running;
                 _gameSettings = settings;
+                var card = await Http.GetFromJsonAsync<CardBackInfo>($"resource/get/{_gameSettings.CardBack.Id}");
+                _gameSettings.CardBack = card;
+
                 _onTheMove = onTheMove.Nickname == _me.Nickname ? _me : _opponent;
                 _board = new Board(settings.BoardSize, cards);
                 StateHasChanged();
