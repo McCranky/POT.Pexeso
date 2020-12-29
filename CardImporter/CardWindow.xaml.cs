@@ -1,20 +1,10 @@
-﻿using Database.Models;
-using Microsoft.Win32;
+﻿using Microsoft.Win32;
 using POT.Pexeso.Shared;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Drawing;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace CardImporter
 {
@@ -64,23 +54,22 @@ namespace CardImporter
 
         private void btnSource_Click(object sender, RoutedEventArgs e)
         {
-            
+
             OpenFileDialog dialog = new OpenFileDialog();
             dialog.Filter = "Image files (*.jpg,*.jpeg,*.png)|*.jpg;*.jpeg;*.png";
             dialog.Title = "Please select an image file.";
 
             if (dialog.ShowDialog() == true) {
-                //Encrypt the selected file. I'll do this later. :)
-                var img = System.Drawing.Image.FromFile(dialog.FileName);
-                var resizedImg = (System.Drawing.Image)(new Bitmap(img, new System.Drawing.Size {Height = 30, Width = 20 }));
-                using (var ms = new MemoryStream()) {
-                    resizedImg.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
-                    Card.Source = $"data:image/png;base64,{Convert.ToBase64String(ms.ToArray())}";
-                }
+                //var img = System.Drawing.Image.FromFile(dialog.FileName);
+                //var resizedImg = (System.Drawing.Image)(new Bitmap(img, new System.Drawing.Size { Height = 275, Width = 220 }));
+                //using (var ms = new MemoryStream()) {
+                //    resizedImg.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+                //    Card.Source = $"data:image/png;base64,{Convert.ToBase64String(ms.ToArray())}";
+                //}
 
                 txtImage.Text = dialog.SafeFileName;
-                //var buffer = File.ReadAllBytes(dialog.FileName);
-                //Card.Source = $"data:image/png;base64,{Convert.ToBase64String(buffer)}";
+                var buffer = File.ReadAllBytes(dialog.FileName);
+                Card.Source = $"data:image/png;base64,{Convert.ToBase64String(buffer)}";
             }
         }
     }

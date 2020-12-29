@@ -1,0 +1,176 @@
+﻿@page "/history"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+
+@using Database.Models
+@using POT.Pexeso.Shared.Pexeso
+@inject HttpClient Http
+@inject IToastService Toast
+@inject ILocalStorageService Storage
+@inject NavigationManager Navigation
+
+<h3 class="m-3 align-self-center">History</h3>
+
+@if (!_isReplay) {
+    <div class="btn-group btn-group-lg align-self-center w-50" role="group">
+        <button class="btn btn-dark" @onclick="@HandleManualReaplay">Manual</button>
+        <button class="btn btn-dark" @onclick="@HandleAutoReplay">Auto</button>
+    </div>
+} else {
+    <PlayerBoardInfo Me="@_me"
+                     Opponent="_opponent"
+                     OnTheMove="_onTheMove"
+                     IsTimeout="false"
+                     Timeout="0" />
+
+    @if (_isManual) {
+        <button class="btn btn-light align-self-center w-25 btn-outline-dark mb-3 " @onclick="HandleStep">Step forward</button>
+    }
+
+    <table class="table-top">
+        @for (int i = 0; i < _height; i++) {
+            <tr>
+                @for (int j = 0; j < _width; j++) {
+                    <td>
+                        <div class="@(_board[i,j].IsFlipped ? "card-container flip" : "card-container")">
+                            <div class="@(_card.Type == CardType.Picture ? "card-pexeso img" : "card-pexeso")"
+                                 style="@(_card.Type == CardType.Picture ?
+                                          $"background-image: url({_card.Source});"
+                                          : $"background-color: {_card.Source};")">
+                                <div class="front face"></div>
+                                <div class="back face text-center pagination-center">
+                                    <i class="@_board[i, j].Data"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                }
+            </tr>
+        }
+    </table>
+}
+
+@code {
+    private bool _isReplay;
+    private bool _isManual;
+    private GameRecord _record;
+    private CardBackInfo _card;
+    private List<MoveRecord> _moves;
+    private Card[,] _board;
+    private int _width;
+    private int _height;
+
+    private Player _me;
+    private Player _opponent;
+    private Player _onTheMove;
+
+    private int _step = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _record = await Storage.GetItemAsync<GameRecord>("gameRecord");
+        if (_record == null) {
+            Toast.ShowError("Go to statistics and select game record to view.");
+            await Task.Delay(3000);
+            Navigation.NavigateTo("/statistics");
+        }
+
+        var user = await Http.GetFromJsonAsync<User>("auth/getDetails");
+        _me = new Player { Nickname = user.Nickname };
+        _opponent = new Player { Nickname = _record.Challenger == _me.Nickname ? _record.Opponent : _record.Challenger };
+        _onTheMove = _me.Nickname == _record.Challenger ? _me : _opponent;
+
+        _card = await Http.GetFromJsonAsync<CardBackInfo>($"resource/getCard/{_record.CardId}");
+        _moves = await Http.GetFromJsonAsync<List<MoveRecord>>($"resource/getMoves/{_record.Id}");
+
+        GameSettings.ParseWidhtAndHeight(_record.BoardSize, out _width, out _height);
+        _board = new Card[_height, _width];
+        foreach (var move in _moves) {
+            if (_board[move.Y, move.X] == null)
+                _board[move.Y, move.X] = new Card { Data = move.Data };
+        }
+
+        StateHasChanged();
+    }
+
+    private void HandleManualReaplay()
+    {
+        _isReplay = true;
+        _isManual = true;
+    }
+
+    private async Task HandleStep()
+    {
+        if (_step < _moves.Count) {
+            var move = _moves[_step];
+            _board[move.Y, move.X].IsFlipped = true;
+            StateHasChanged();
+
+            if (_step != _moves.Count - 1 && _moves[_step + 1].Nickname != move.Nickname) {
+                _onTheMove = _onTheMove.Nickname == _me.Nickname ? _opponent : _me;
+                _isManual = false;
+                await Task.Delay(GameSettings.CardShowDelay * 1000);
+                _isManual = true;
+                _board[move.Y, move.X].IsFlipped = false;
+                var prevMove = _moves[_step - 1];
+                _board[prevMove.Y, prevMove.X].IsFlipped = false;
+                StateHasChanged();
+            }
+
+            if (_step > 0 && _moves[_step - 1].Data == move.Data && _moves[_step - 1].Nickname == _onTheMove.Nickname) {
+                ++_onTheMove.Score;
+                StateHasChanged();
+            }
+
+            ++_step;
+            if (_step == _moves.Count) {
+                _isManual = false;
+                Toast.ShowInfo("Game ended.");
+            }
+        }
+    }
+
+    private async Task HandleAutoReplay()
+    {
+        _isReplay = true;
+
+        var moveIndex = 0;
+        var delay = _moves[moveIndex].Time - _record.Started;
+        var hasShowDelay = false;
+        while (moveIndex < _moves.Count) {
+            var move = _moves[moveIndex];
+
+            if (hasShowDelay) {
+                await Task.Delay((int)Math.Abs(delay.TotalMilliseconds - GameSettings.CardShowDelay * 1000));
+                hasShowDelay = false;
+            } else {
+                await Task.Delay((int)Math.Abs(delay.TotalMilliseconds));
+            }
+
+            _board[move.Y, move.X].IsFlipped = true;
+            StateHasChanged();
+
+            if (moveIndex != _moves.Count - 1) {
+                delay = _moves[moveIndex + 1].Time - move.Time;
+
+                if (_moves[moveIndex + 1].Nickname != move.Nickname) {
+                    _onTheMove = _onTheMove.Nickname == _me.Nickname ? _opponent : _me;
+                    await Task.Delay(GameSettings.CardShowDelay * 1000);
+                    _board[move.Y, move.X].IsFlipped = false;
+                    var prevMove = _moves[moveIndex - 1];
+                    _board[prevMove.Y, prevMove.X].IsFlipped = false;
+                    hasShowDelay = true;
+                    StateHasChanged();
+                }
+            }
+
+            if (moveIndex > 0 && _moves[moveIndex - 1].Data == move.Data && _moves[moveIndex - 1].Nickname == _onTheMove.Nickname) {
+                ++_onTheMove.Score;
+                StateHasChanged();
+            }
+            ++moveIndex;
+        }
+
+        Toast.ShowInfo("Game ended.");
+    }
+
+}

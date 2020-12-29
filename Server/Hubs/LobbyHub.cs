@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-using POT.Pexeso.Data;
 using POT.Pexeso.Server.Services;
 using POT.Pexeso.Shared;
 using System;
@@ -11,17 +10,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using System.Timers;
 
 namespace POT.Pexeso.Server.Hubs
 {
     [Authorize]
     public class LobbyHub : Hub
     {
-        private IHttpContextAccessor _httpContextAccessor;
-        private PexesoDbContext _dataContext;
-        private LobbyService _lobbyService;
-        private GameService _gameService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly PexesoDbContext _dataContext;
+        private readonly LobbyService _lobbyService;
+        private readonly GameService _gameService;
 
         public LobbyHub(IHttpContextAccessor httpContext, PexesoDbContext dataContext, LobbyService userService, GameService gameService)
         {
@@ -45,9 +43,9 @@ namespace POT.Pexeso.Server.Hubs
             await _dataContext.SaveChangesAsync();
             // poslem mu aktualny zoznam
             await Clients.Caller.SendAsync("GetAllUsers", _lobbyService.GetAllOnlineUsers()
-                .Select(pair => new UserDisplayInfo { 
-                    Nickname = pair.Key, 
-                    Status = pair.Value.Status 
+                .Select(pair => new UserDisplayInfo {
+                    Nickname = pair.Key,
+                    Status = pair.Value.Status
                 })
                 .Where(info => info.Nickname != nick));
             // ostatnym poslem noveho usera
@@ -109,9 +107,10 @@ namespace POT.Pexeso.Server.Hubs
         {
             _gameService.AddGame(details.GameSettings, details.NicknameFrom, details.NicknameTo);
 
-            var ids = new List<string>();
-            ids.Add(_lobbyService.GetConnectionId(details.NicknameTo));
-            ids.Add(_lobbyService.GetConnectionId(details.NicknameFrom));
+            var ids = new List<string> {
+                _lobbyService.GetConnectionId(details.NicknameTo),
+                _lobbyService.GetConnectionId(details.NicknameFrom)
+            };
             await Clients.Clients(ids).SendAsync("InvitationAccepted", details);
         }
     }

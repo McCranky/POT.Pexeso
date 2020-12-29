@@ -1,10 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using POT.Pexeso.Server.Services;
 using POT.Pexeso.Shared;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace POT.Pexeso.Server.Controllers
 {
@@ -12,7 +9,7 @@ namespace POT.Pexeso.Server.Controllers
     [Route("[controller]")]
     public class UserController : ControllerBase
     {
-        private LobbyService _userService;
+        private readonly LobbyService _userService;
         public UserController(LobbyService userService)
         {
             _userService = userService;

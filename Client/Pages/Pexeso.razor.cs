@@ -7,7 +7,6 @@ using POT.Pexeso.Shared;
 using POT.Pexeso.Shared.Pexeso;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
@@ -23,6 +22,9 @@ namespace POT.Pexeso.Client.Pages
 
         [CascadingParameter]
         public Task<AuthenticationState> AuthState { get; set; }
+
+        private readonly Stack<Message> _messages = new Stack<Message>();
+        private string _messageText;
 
         private HubConnection _hubConnection;
         private GameState _gameState;
@@ -50,7 +52,7 @@ namespace POT.Pexeso.Client.Pages
 
                 _gameState = GameState.Running;
                 _gameSettings = settings;
-                var card = await Http.GetFromJsonAsync<CardBackInfo>($"resource/get/{_gameSettings.CardBack.Id}");
+                var card = await Http.GetFromJsonAsync<CardBackInfo>($"resource/getCard/{_gameSettings.CardBack.Id}");
                 _gameSettings.CardBack = card;
 
                 _onTheMove = onTheMove.Nickname == _me.Nickname ? _me : _opponent;
@@ -124,14 +126,26 @@ namespace POT.Pexeso.Client.Pages
                 StateHasChanged();
             });
 
+            _hubConnection.On<string, string>("ReceiveMessage", (text, nick) => {
+                _messages.Push(new Message { Nickname = nick, Text = text });
+                StateHasChanged();
+            });
+
             await _hubConnection.StartAsync();
+        }
+
+        public async Task HandleSendMessage()
+        {
+            await _hubConnection.SendAsync("SendMessage", _messageText, _me.Nickname, _opponent.Nickname);
+            _messages.Push(new Message { Text = _messageText, Nickname = _me.Nickname });
+            _messageText = "";
         }
 
         public async Task HandleCardSelect(int height, int width)
         {
             var card = _board[height, width];
-            if (card.IsFlipped || 
-                _onTheMove != _me || 
+            if (card.IsFlipped ||
+                _onTheMove != _me ||
                 _gameState != GameState.Running) return;
 
             card.IsFlipped = true;

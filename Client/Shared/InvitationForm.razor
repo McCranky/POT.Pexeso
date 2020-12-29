@@ -65,7 +65,7 @@
     protected override async Task OnInitializedAsync()
     {
         _boardSizes = Enum.GetValues<BoardSize>();
-        _cards = await Http.GetFromJsonAsync<List<CardBackInfo>>("resource/getall");
+        _cards = await Http.GetFromJsonAsync<List<CardBackInfo>>("resource/getCards");
     }
 
     private void HandleTypeChanged(ChangeEventArgs args)

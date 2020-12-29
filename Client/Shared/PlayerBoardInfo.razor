@@ -1,0 +1,38 @@
+﻿<ul class="list-group w-50 align-self-center m-3 text-center">
+    <li class="list-group-item">
+        @if (OnTheMove == Me) {
+            <p class="my-turn"><i class="fas fa-arrow-right"></i>  @Me.Nickname: @Me.Score</p>
+        } else {
+            <p>@Me.Nickname: @Me.Score</p>
+        }
+    </li>
+
+    <li class="list-group-item cursor-default">
+        @if (OnTheMove == Opponent) {
+            <p><i class="fas fa-arrow-right"></i>   @Opponent.Nickname: @Opponent.Score</p>
+        } else {
+            <p> @Opponent.Nickname: @Opponent.Score</p>
+        }
+    </li>
+
+    @if (IsTimeout) {
+        <li class="list-group-item cursor-default">
+            <p class="font-weight-bolder text-danger">
+                Countdown: @Timeout
+            </p>
+        </li>
+    }
+</ul>
+
+@code {
+    [Parameter]
+    public Player Me { get; set; }
+    [Parameter]
+    public Player Opponent { get; set; }
+    [Parameter]
+    public Player OnTheMove { get; set; }
+    [Parameter]
+    public bool IsTimeout { get; set; }
+    [Parameter]
+    public int Timeout { get; set; }
+}

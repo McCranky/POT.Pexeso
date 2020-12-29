@@ -54,7 +54,7 @@ namespace POT.Pexeso.Client.Pages
 
             hubConnection.On<InvitationDetails>("ReceiveInvitation", async (details) => {
                 _invitationDetails = details;
-                var card = await Http.GetFromJsonAsync<CardBackInfo>($"resource/get/{_invitationDetails.GameSettings.CardBack.Id}");
+                var card = await Http.GetFromJsonAsync<CardBackInfo>($"resource/getCard/{_invitationDetails.GameSettings.CardBack.Id}");
                 _invitationDetails.GameSettings.CardBack.Source = card.Source;
                 _isWaiting = true;
                 StateHasChanged();
@@ -71,8 +71,7 @@ namespace POT.Pexeso.Client.Pages
                 StateHasChanged();
             });
 
-            hubConnection.On<InvitationDetails>("InvitationAccepted", async (details) => {
-                //await Storage.SetItemAsync("invitationDetails", details);
+            hubConnection.On<InvitationDetails>("InvitationAccepted", (details) => {
                 Navigation.NavigateTo("/pexeso");
             });
 

@@ -1,12 +1,8 @@
-﻿using Database;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
-using POT.Pexeso.Data;
 using POT.Pexeso.Server.Services;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -15,15 +11,13 @@ namespace POT.Pexeso.Server.Hubs
     [Authorize]
     public class GameHub : Hub
     {
-        private IHttpContextAccessor _httpContextAccessor;
-        private PexesoDbContext _dataContext;
-        private LobbyService _lobbyService;
-        private GameService _gameService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly LobbyService _lobbyService;
+        private readonly GameService _gameService;
 
-        public GameHub(IHttpContextAccessor httpContext, PexesoDbContext dataContext, LobbyService userService, GameService gameService)
+        public GameHub(IHttpContextAccessor httpContext, LobbyService userService, GameService gameService)
         {
             _httpContextAccessor = httpContext;
-            _dataContext = dataContext;
             _lobbyService = userService;
             _gameService = gameService;
         }
@@ -32,14 +26,14 @@ namespace POT.Pexeso.Server.Hubs
         {
             var nick = GetNick();
             await _gameService.JoinToGame(nick, Context.ConnectionId);
-            
+
             await base.OnConnectedAsync();
         }
 
         public override async Task OnDisconnectedAsync(Exception exception)
         {
             var nick = GetNick();
-            await _gameService.LeaveGame(nick);
+            _gameService.LeaveGame(nick);
 
             await base.OnDisconnectedAsync(exception);
         }
@@ -48,6 +42,13 @@ namespace POT.Pexeso.Server.Hubs
         {
             var nick = GetNick();
             await _gameService.FlipCard(nick, height, width);
+        }
+
+        public async Task SendMessage(string text, string from, string to)
+        {
+            var connId = _lobbyService.GetConnectionId(to);
+            await Clients.Client(connId).SendAsync("ReceiveMessage", text, from);
+            //await _gameService.FlipCard(nick, height, width);
         }
 
         private string GetNick()

@@ -9,9 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "POT.Pexeso.Client", "Client
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "POT.Pexeso.Shared", "Shared\POT.Pexeso.Shared.csproj", "{AF71ECFB-81C0-4061-9A45-56A4D7902817}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Database", "Database\Database.csproj", "{9B444E68-84D2-4C9C-8F38-8E36E25DD4B5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Database", "Database\Database.csproj", "{9B444E68-84D2-4C9C-8F38-8E36E25DD4B5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CardImporter", "CardImporter\CardImporter.csproj", "{2552B2E0-EB2E-4ED4-B817-DD027E521A1C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CardImporter", "CardImporter\CardImporter.csproj", "{2552B2E0-EB2E-4ED4-B817-DD027E521A1C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

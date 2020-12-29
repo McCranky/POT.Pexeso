@@ -1,9 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
-using Microsoft.EntityFrameworkCore;
-using POT.Pexeso.Data;
 using POT.Pexeso.Server.Hubs;
 using POT.Pexeso.Shared;
-using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,10 +18,10 @@ namespace POT.Pexeso.Server.Services
 
     public class LobbyService
     {
-        private ConcurrentDictionary<string, Details> _onlineUsers;
-        private IHubContext<LobbyHub> _hub;
+        private readonly ConcurrentDictionary<string, Details> _onlineUsers;
+        private readonly IHubContext<LobbyHub> _hub;
 
-        private Timer _pairingTimer;
+        private readonly Timer _pairingTimer;
 
         public LobbyService(IHubContext<LobbyHub> hubContext)
         {

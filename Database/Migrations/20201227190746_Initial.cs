@@ -1,5 +1,5 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+using System;
 
 namespace Database.Migrations
 {
@@ -9,23 +9,20 @@ namespace Database.Migrations
         {
             migrationBuilder.CreateTable(
                 name: "Cards",
-                columns: table => new
-                {
+                columns: table => new {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Type = table.Column<int>(type: "INTEGER", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: true),
                     Source = table.Column<string>(type: "TEXT", nullable: true)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_Cards", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Records",
-                columns: table => new
-                {
+                columns: table => new {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     BoardSize = table.Column<int>(type: "INTEGER", nullable: false),
@@ -38,15 +35,13 @@ namespace Database.Migrations
                     ChallengerMoves = table.Column<int>(type: "INTEGER", nullable: false),
                     OpponentMoves = table.Column<int>(type: "INTEGER", nullable: false)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_Records", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Users",
-                columns: table => new
-                {
+                columns: table => new {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Nickname = table.Column<string>(type: "TEXT", nullable: true),
@@ -55,15 +50,13 @@ namespace Database.Migrations
                     Draws = table.Column<int>(type: "INTEGER", nullable: false),
                     IsOnline = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_Users", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
                 name: "MoveRecord",
-                columns: table => new
-                {
+                columns: table => new {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Nickname = table.Column<string>(type: "TEXT", nullable: true),
@@ -72,8 +65,7 @@ namespace Database.Migrations
                     Y = table.Column<int>(type: "INTEGER", nullable: false),
                     GameRecordId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_MoveRecord", x => x.Id);
                     table.ForeignKey(
                         name: "FK_MoveRecord_Records_GameRecordId",

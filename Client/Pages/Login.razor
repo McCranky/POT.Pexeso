@@ -13,25 +13,8 @@
     </div>
 </div>
 
-@*<div class="row">
-    <div class="col-9">
-        <div class="input-group">
-            <select class="custom-select" id="image" @onchange="HandleCardSelect">
-                <option selected>Choose image...</option>
-                <option value="/images/kermit.jpg">Kermit</option>
-                <option value="/images/space_candy.jpg">Space candy</option>
-            </select>
-        </div>
-    </div>
-    
-    <div class="col-3 text-center center p-2" style="border-radius: 7px;">
-        <img src="@_color" alt="Card preview"/>
-    </div>
-</div>*@
-
 @code {
     private string _nickname;
-    //private string _color;
 
     private async Task HandleAuthentication()
     {
@@ -45,9 +28,4 @@
             Toast.ShowError("Nickname already used.");
         }
     }
-
-    //private void HandleCardSelect(ChangeEventArgs args)
-    //{
-    //    _color = args.Value.ToString();
-    //}
 }

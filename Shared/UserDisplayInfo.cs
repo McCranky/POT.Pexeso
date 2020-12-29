@@ -12,7 +12,7 @@
         public string Nickname { get; set; }
         public Status Status { get; set; }
 
-        public UserDisplayInfo() {}
+        public UserDisplayInfo() { }
 
         public UserDisplayInfo(string nickname, Status status)
         {

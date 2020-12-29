@@ -1,0 +1,75 @@
+﻿@page "/statistics"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+
+@using Database.Models
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject ILocalStorageService Storage
+
+<div class="card-deck align-self-center m-3">
+    <div class="card" style="width: 18rem;">
+        <div class="card-body text-center">
+            <h5 class="card-title">Personal stats</h5>
+            @if (_user != null) {
+                <p class="card-text"><i class="fas fa-trophy"></i> Wins: @_user.Wins</p>
+                <p class="card-text"><i class="fas fa-toilet"></i> Loses: @_user.Loses</p>
+                <p class="card-text"><i class="fas fa-handshake"></i> Draws: @_user.Draws</p>
+            }
+        </div>
+    </div>
+
+    <div class="card" style="width: 18rem;">
+        <div class="card-body text-center">
+            <h5 class="card-title">Global stats</h5>
+            @if (_globalStats != null) {
+                <p class="card-text"><i class="fas fa-stopwatch"></i> Total game time: @_globalStats.TotalTime</p>
+                <p class="card-text"><i class="fas fa-gamepad"></i> Total games: @_globalStats.GamesCount</p>
+            }
+        </div>
+    </div>
+</div>
+
+@if (_records != null) {
+    <ul class="list-group w-25 align-self-center m-3 text-center">
+        @foreach (var record in _records) {
+            <li class="list-group-item user-select" @onclick="@(() => HandleRecordSelect(record))">
+                <p>Result: @(string.IsNullOrWhiteSpace(record.Winner) ? "Draw" : $"{record.Winner} is the winner")</p>
+                <p>Challenger: @record.Challenger, @($"{record.ChallengerMoves} moves")</p>
+                <p>Opponent: @record.Opponent, @($"{record.OpponentMoves} moves")</p>
+                <p>Duration(hh:mm:ss): @((record.Ended - record.Started).ToString("hh':'mm':'ss"))</p>
+                <p>Board size: @(GameSettings.FormatBoardEnum(record.BoardSize))</p>
+                <p>Cards(Type:Name): @_cards[record.CardId].Type:@_cards[record.CardId].Name</p>
+            </li>
+        }
+    </ul>
+}
+
+@code {
+    private Database.Models.User _user;
+    private IList<GameRecord> _records;
+    private Dictionary<int, CardBackInfo> _cards;
+    private GlobalStats _globalStats;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _user = await Http.GetFromJsonAsync<User>("auth/getDetails");
+
+        _globalStats = await Http.GetFromJsonAsync<GlobalStats>("resource/getGlobalStats");
+
+        _records = await Http.GetFromJsonAsync<List<GameRecord>>($"resource/getGameRecords/{_user.Nickname}");
+
+        _cards = new Dictionary<int, CardBackInfo>();
+        var cards = await Http.GetFromJsonAsync<List<CardBackInfo>>($"resource/getCards");
+        foreach (var card in cards) {
+            _cards.Add(card.Id, card);
+        }
+
+        StateHasChanged();
+    }
+
+    private async Task HandleRecordSelect(GameRecord record)
+    {
+        await Storage.SetItemAsync("gameRecord", record);
+        Navigation.NavigateTo("/history");
+    }
+}

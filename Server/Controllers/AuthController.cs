@@ -3,11 +3,7 @@ using Database.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using POT.Pexeso.Data;
 using POT.Pexeso.Shared;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -17,10 +13,19 @@ namespace POT.Pexeso.Server.Controllers
     [Route("[controller]")]
     public class AuthController : ControllerBase
     {
-        PexesoDbContext _context;
+        private readonly PexesoDbContext _context;
+        private static bool _initialized = false;
         public AuthController(PexesoDbContext dataContext)
         {
             _context = dataContext;
+            if (!_initialized) {
+                _initialized = true;
+                foreach (var user in _context.Users) {
+                    user.IsOnline = false;
+                    _context.Users.Update(user);
+                }
+                _context.SaveChanges();
+            }
         }
 
         [HttpPost("login")]
@@ -66,6 +71,17 @@ namespace POT.Pexeso.Server.Controllers
             return Ok(currentUser);
         }
 
+        [HttpGet("getDetails")]
+        public async Task<ActionResult<User>> GetCurrentUserDetails()
+        {
+            if (User.Identity.IsAuthenticated) {
+                var nick = User.FindFirstValue(ClaimTypes.Name);
+                var dbUser = await _context.Users.FirstOrDefaultAsync(user => user.Nickname == nick);
+                return Ok(dbUser);
+            }
+            return BadRequest(null);
+        }
+
         [HttpGet("logout")]
         public async Task<ActionResult> LogoutUser()
         {
@@ -77,7 +93,7 @@ namespace POT.Pexeso.Server.Controllers
                 await _context.SaveChangesAsync();
                 await HttpContext.SignOutAsync();
             }
-                
+
             return Ok();
         }
     }

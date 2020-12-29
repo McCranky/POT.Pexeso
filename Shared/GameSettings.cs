@@ -1,10 +1,5 @@
-﻿using POT.Pexeso.Shared.Pexeso;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace POT.Pexeso.Shared
 {
@@ -57,5 +52,5 @@ namespace POT.Pexeso.Shared
             height = int.Parse(dimensions[1]);
         }
     }
-    
+
 }

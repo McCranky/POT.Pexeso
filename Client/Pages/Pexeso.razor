@@ -1,30 +1,11 @@
 ﻿@page "/pexeso"
- 
-<ul class="list-group w-50 align-self-center m-3 text-center">
-    <li class="list-group-item">
-        @if (_onTheMove == _me) {
-            <p class="my-turn"><i class="fas fa-arrow-right"></i>  @_me.Nickname: @_me.Score</p>
-        } else {
-            <p>@_me.Nickname: @_me.Score</p>
-        }
-    </li>
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
 
-    <li class="list-group-item cursor-default">
-        @if (_onTheMove == _opponent) {
-            <p><i class="fas fa-arrow-right"></i>   @_opponent.Nickname: @_opponent.Score</p>
-        } else {
-            <p> @_opponent.Nickname: @_opponent.Score</p>
-        }
-    </li>
-
-    @if (_isTimeout) {
-        <li class="list-group-item cursor-default">
-            <p class="font-weight-bolder text-danger">
-                Countdown: @_timeout
-            </p>
-        </li>
-    }
-</ul>
+<PlayerBoardInfo Me="@_me"
+                 Opponent="_opponent"
+                 OnTheMove="_onTheMove"
+                 IsTimeout="_isTimeout"
+                 Timeout="_timeout"/>
 
 @if (_board != null) {
     <table class="table-top">
@@ -51,3 +32,17 @@
         }
     </table>
 }
+
+<div class="input-group m-3 align-self-center w-75">
+    <input type="text" class="form-control" placeholder="Message text..." @bind-value="@_messageText">
+    <div class="input-group-append">
+        <button class="btn btn-outline-secondary" type="button" @onclick="HandleSendMessage">Send</button>
+    </div>
+</div>
+
+<ul class="list-group list-group-flush align-self-center m-3">
+    @foreach (var message in _messages)
+	{
+        <li class="list-group-item">@message.Nickname: @message.Text</li>
+	}
+</ul>

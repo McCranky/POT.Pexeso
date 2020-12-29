@@ -17,7 +17,6 @@ namespace Database.Models
         public string Opponent { get; set; }
         public int ChallengerMoves { get; set; }
         public int OpponentMoves { get; set; }
-        //public int MovesId { get; set; }
         public ICollection<MoveRecord> Moves { get; set; }
     }
 }
